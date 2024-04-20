@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -77,7 +76,6 @@ func Deploy(dir string) bool {
 		Callback: callback,
 	})
 	if err != nil {
-		fmt.Println("shit")
 		logger.Err(err).Msg("")
 		return false
 	}

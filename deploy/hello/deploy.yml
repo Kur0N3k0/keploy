@@ -1,7 +1,7 @@
 user: root
-host: example.com
-port: 22
-keyfile: ./key.pem
+host: ltar.cc
+port: 9505
+keyfile: /root/.ssh/ltra-cc.pem
 keypass: 
 password: aaaaa
 files:
