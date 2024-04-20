@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -33,7 +34,7 @@ func GetLogger(log_file string) zerolog.Logger {
 	}
 	return zerolog.New(
 		zerolog.ConsoleWriter{Out: logfile, TimeFormat: time.RFC3339},
-	).Level(zerolog.TraceLevel).With().Timestamp().Caller().Logger()
+	).Level(zerolog.DebugLevel).With().Timestamp().Caller().Logger()
 }
 
 func Deploy(dir string) bool {
@@ -44,26 +45,26 @@ func Deploy(dir string) bool {
 	compose := KeployCompose{}
 	cwd, err := os.Getwd()
 	if err != nil {
-		logger.Err(err)
+		logger.Err(err).Msg("")
 		return false
 	}
 
 	data, err := ioutil.ReadFile("deploy.yml")
 	if err != nil {
-		logger.Err(err)
+		logger.Err(err).Msg("")
 		return false
 	}
 	yaml.Unmarshal(data, &compose)
 
 	auth, err := goph.Key(compose.KeyFile, compose.KeyPass)
 	if err != nil {
-		logger.Err(err)
+		logger.Err(err).Msg("change to password-mode")
 		auth = goph.Password(compose.Password)
 	}
 
 	callback, err := goph.DefaultKnownHosts()
 	if err != nil {
-		logger.Err(err)
+		logger.Err(err).Msg("")
 		return false
 	}
 
@@ -76,7 +77,8 @@ func Deploy(dir string) bool {
 		Callback: callback,
 	})
 	if err != nil {
-		logger.Err(err)
+		fmt.Println("shit")
+		logger.Err(err).Msg("")
 		return false
 	}
 	defer client.Close()
@@ -91,8 +93,8 @@ func Deploy(dir string) bool {
 		logger.Info().Msg("Upload[" + strconv.Itoa(i) + "] " + src + " -> " + dst)
 		err := client.Upload(src, dst)
 		if err != nil {
-			logger.Err(err)
-			return false
+			logger.Err(err).Msg("")
+			continue
 		}
 		logger.Info().Msg("Upload[" + strconv.Itoa(i) + "] Success")
 	}
@@ -101,7 +103,7 @@ func Deploy(dir string) bool {
 		logger.Info().Msg("CMD: " + cmd)
 		res, err := client.Run(cmd)
 		if err != nil {
-			logger.Err(err)
+			logger.Err(err).Msg("")
 			continue
 		}
 		logger.Info().Msg("RES: " + string(res))
@@ -125,7 +127,7 @@ func main() {
 	dir := parser.String("d", "dir", &argparse.Options{Required: true, Help: "deploy folder"})
 	err := parser.Parse(os.Args)
 	if err != nil {
-		logger.Err(err)
+		logger.Err(err).Msg("")
 		os.Exit(1)
 	}
 
@@ -139,12 +141,12 @@ func main() {
 
 	cwd, err := os.Getwd()
 	if err != nil {
-		logger.Err(err)
+		logger.Err(err).Msg("")
 		os.Exit(1)
 	}
 	entrys, err := os.ReadDir(*dir)
 	if err != nil {
-		logger.Err(err)
+		logger.Err(err).Msg("")
 		os.Exit(1)
 	}
 
