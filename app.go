@@ -26,8 +26,8 @@ type KeployCompose struct {
 	Cmds     []string
 }
 
-func GetLogger() zerolog.Logger {
-	logfile, err := os.OpenFile("deploy.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0640)
+func GetLogger(log_file string) zerolog.Logger {
+	logfile, err := os.OpenFile(log_file, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0640)
 	if err != nil {
 		log.Print(err)
 	}
@@ -38,7 +38,7 @@ func GetLogger() zerolog.Logger {
 
 func Deploy(dir string) bool {
 	os.Chdir(dir)
-	logger := GetLogger()
+	logger := GetLogger("deploy.log")
 	logger.Info().Msg("Entered " + dir)
 
 	compose := KeployCompose{}
@@ -72,7 +72,7 @@ func Deploy(dir string) bool {
 		Addr:     compose.Host,
 		Port:     compose.Port,
 		Auth:     auth,
-		Timeout:  goph.DefaultTimeout,
+		Timeout:  5 * time.Second,
 		Callback: callback,
 	})
 	if err != nil {
@@ -120,10 +120,7 @@ func Worker(deploy_paths <-chan string, deploy_result chan<- bool) {
 }
 
 func main() {
-	logger := zerolog.New(
-		zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339},
-	).Level(zerolog.TraceLevel).With().Timestamp().Caller().Logger()
-
+	logger := GetLogger("keploy.log")
 	parser := argparse.NewParser("keploy", "deploy system using ssh")
 	dir := parser.String("d", "dir", &argparse.Options{Required: true, Help: "deploy folder"})
 	err := parser.Parse(os.Args)
