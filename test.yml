@@ -1,0 +1,11 @@
+user: root
+host: example.com
+port: 22
+keyfile: ~/.ssh/key.pem
+keypass: 
+password: SuperStringPassword
+files:
+  - ./test.txt:~/test2.txt
+cmds: [
+  "echo 123 > ~/test3.txt"
+]
