@@ -1,0 +1,11 @@
+user: root
+host: example.com
+port: 22
+keyfile: ./key.pem
+keypass: 
+password: aaaaa
+files:
+  - ./test.txt:/root/service/keploy/test4.txt
+cmds: [
+  "echo 123 > /root/service/keploy/test5.txt"
+]
